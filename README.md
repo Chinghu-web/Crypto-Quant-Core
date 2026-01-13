@@ -1,4 +1,3 @@
-```markdown
 # Crypto-Quant-Core 🚀
 
 <!-- 顶部导航栏 -->
@@ -134,4 +133,3 @@ Crypto-Quant-Core/
 
 ## 🤝 License
 MIT License
-```
