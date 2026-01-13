@@ -1,0 +1,792 @@
+# ============ 基础交易所配置 ============
+exchange:
+  name: binance
+  market_type: "future"
+  timeframe: "1m"
+  limit: 2000
+
+analytics:
+  storage:
+    path: "./signals.db"
+
+# ============ 信号跟踪配置 ============
+tracking:
+  fill_timeout_min: 45
+  exit_timeout_hours: 24
+  slippage_tolerance: 0.005
+
+# ============ 报告系统 ============
+reporting:
+  enabled: true
+  timezone: "Asia/Singapore"
+  daily_report:
+    enabled: true
+    send_time: "09:00"
+  weekly_report:
+    enabled: true
+    send_day: 0
+    send_time: "09:00"
+
+# ============ 🔥🔥🔥 统一RSI配置 (v7.9.4平衡版) ============
+reversal_strategy:
+  rsi_long_max: 20          # 🔥 v7.9.4: 15 -> 20 (放宽)
+  rsi_short_min: 80         # 🔥 v7.9.4: 85 -> 80 (放宽)
+  rsi_extreme_long: 15      # 🔥 v7.9.4: 12 -> 15 (放宽)
+  rsi_extreme_short: 85     # 🔥 v7.9.4: 88 -> 85 (放宽)
+  min_volume_ratio: 1.5     # 🔥 v7.9.4: 2.0 -> 1.5 (放宽)
+  require_confirmation: true
+  require_momentum_weakening: true
+
+# ============ 🔥 推送配置 (v7.9.4平衡版) ============
+push:
+  master: "on"
+  observe_only: false
+  thresholds:
+    majors: 0.60    # 🔥 v7.9.4: 0.65 -> 0.60 (放宽)
+  
+  llm_gate:
+    reversal_only: false
+    reversal_long_rsi_max: 25
+    reversal_short_rsi_min: 75
+
+telegram:
+  bot_token: "xxxxx"
+  chat_id: [xxxxx]
+  notify_on_start: true
+  notify_on_stop: true
+
+# ============ OKX 自动交易 ============
+auto_trading:
+  enabled: true
+
+  okx:
+    api_key: "xxxxxxx"
+    secret: "xxxxxxx"
+    passphrase: "xxxxxxxx"
+    testnet: false
+    hostname: "www.okx.com"
+
+  capital:
+    total_usdt: xxx              # 🔥 (实际资金)
+    max_position_pct: 0.2       # 🔥 更新: 0.3 -> 0.2 (更保守)
+    min_position_usdt: xxx       # 🔥 (单笔最少金额)
+    max_position_usdt: xxx       # 🔥 (单笔最多金额)
+    reserve_pct: 0.15           # 🔥 更新: 0.1 -> 0.15 (多留点备用)
+
+  risk:
+    max_positions: 5
+    max_leverage: 30               最大杠杆数
+    default_leverage: 20
+    force_stop_loss: true
+    sl_slippage_buffer: 0.002
+
+  entry:
+    use_immediate_price: true
+    max_slippage: 0.005
+    retry_times: 3
+    retry_delay_sec: 2
+    
+    # 🔥🔥🔥 新增：追踪入场/分批建仓策略
+    tracking_entry:
+      enabled: true
+      mode: "scaled"
+      
+      scaled:
+        first_entry_pct: 0.5
+        confirm_move_pct: 0.005
+        confirm_timeout_min: 10
+        stop_on_reverse_pct: 0.01
+      
+      limit:
+        offset_pct: 0.003
+        timeout_min: 5
+
+  exit:
+    use_ai_targets: true
+
+    strategy_params:
+      reversal:
+        max_tp_pct: 0.12
+        min_tp_pct: 0.02
+        max_sl_pct: 0.02
+        min_sl_pct: 0.01
+        trailing_stop_activation_pct: 0.01
+        trailing_stop_distance_pct: 0.005
+        reversal_rsi_threshold_long: 75
+        reversal_rsi_threshold_short: 25
+        reversal_check_interval_sec: 60
+      
+      trend:
+        max_tp_pct: 0.15
+        min_tp_pct: 0.02
+        max_sl_pct: 0.02
+        min_sl_pct: 0.01
+        trailing_stop_activation_pct: 0.008
+        trailing_stop_distance_pct: 0.003
+        reversal_rsi_threshold_long: 85
+        reversal_rsi_threshold_short: 15
+        reversal_check_interval_sec: 30
+      
+      trend_continuation:
+        max_tp_pct: 0.08
+        min_tp_pct: 0.03
+        max_sl_pct: 0.025
+        min_sl_pct: 0.015
+        trailing_stop_activation_pct: 0.015
+        trailing_stop_distance_pct: 0.008
+        reversal_rsi_threshold_long: 70
+        reversal_rsi_threshold_short: 30
+        reversal_check_interval_sec: 45
+      
+      trend_anticipation:
+        max_tp_pct: 0.10
+        min_tp_pct: 0.03
+        max_sl_pct: 0.02
+        min_sl_pct: 0.012
+        trailing_stop_activation_pct: 0.012
+        trailing_stop_distance_pct: 0.006
+        reversal_rsi_threshold_long: 70
+        reversal_rsi_threshold_short: 30
+        reversal_check_interval_sec: 45
+
+    trailing_stop: true
+    trailing_stop_activation_pct: 0.01
+    trailing_stop_distance_pct: 0.005
+    trailing_stop_step_pct: 0.005
+
+    breakeven_stop: true
+    breakeven_activation_pct: 0.004
+    breakeven_buffer_pct: 0.001
+
+    reversal_detection: true
+    reversal_check_interval_sec: 60
+    reversal_rsi_threshold_long: 75
+    reversal_rsi_threshold_short: 25
+    reversal_macd_check: true
+    
+    reversal_counter_trade: true
+    counter_trade_type: "limit"
+    counter_trade_offset_pct: 0.003
+    counter_trade_timeout_min: 5
+    counter_trade_size_pct: 0.5
+    counter_trade_use_ai: true
+    counter_trade_min_profit_pct: 0.005
+
+    # ============ 🔥🔥🔥 阶梯式移动止损 v2.1 ============
+    tiered_trailing_stop: true
+    trailing_tiers:
+      - trigger_pct: 0.004    # 盈利0.4%
+        lock_pct: 0.001       # 锁定0.1%（保本）
+      - trigger_pct: 0.01     # 盈利1%
+        lock_pct: 0.003       # 锁定0.3%
+      - trigger_pct: 0.02     # 盈利2%
+        lock_pct: 0.012       # 锁定1.2%
+      - trigger_pct: 0.03     # 盈利3%
+        lock_pct: 0.025       # 锁定2.5%
+      - trigger_pct: 0.04     # 盈利4%
+        lock_pct: 0.036       # 锁定3.6%
+      - trigger_pct: 0.05     # 盈利5%
+        lock_pct: 0.048       # 锁定4.8%
+      - trigger_pct: 0.06     # 盈利6%
+        lock_pct: 0.058       # 锁定5.8%
+      - trigger_pct: 0.08     # 盈利8%
+        lock_pct: 0.076       # 锁定7.6%
+      - trigger_pct: 0.10     # 盈利10%
+        lock_pct: 0.095       # 锁定9.5%
+      - trigger_pct: 0.15     # 盈利15%
+        lock_pct: 0.145       # 锁定14.5%
+      - trigger_pct: 0.20     # 盈利20%
+        lock_pct: 0.195       # 锁定19.5%
+      - trigger_pct: 0.30     # 盈利30%
+        lock_pct: 0.29        # 锁定29%
+      - trigger_pct: 0.50     # 盈利50%
+        lock_pct: 0.48        # 锁定48%
+
+    dynamic_take_profit: true
+    tp_extension_on_momentum: true
+    tp_tighten_on_weakness: true
+    momentum_strong_threshold: 0.01
+    momentum_weak_threshold: -0.005
+    tp_extension_pct: 0.15
+    tp_tighten_buffer_pct: 0.01
+    tp_min_profit_to_tighten: 0.02
+
+    partial_take_profit: false
+
+  safety:
+    require_signal_approval: true
+    check_balance_before_trade: true
+    max_daily_trades: 10
+    max_daily_loss_pct: 0.2
+    emergency_stop_loss_pct: 0.5
+
+# ============ 🔥🔥🔥 信号观察系统 v5.1 (已放宽容忍度) ============
+watch:
+  enabled: true
+  expire_minutes: 4
+  check_interval_seconds: 30
+  timing_ai: "deepseek"
+  price_ai_rotation: false
+  limit_order_timeout_minutes: 3
+  allow_ai_abandon: true
+
+  tiered_observation:
+    enabled: true
+    
+    extreme:
+      rsi_long_threshold: 20      # 🔥 v7.9.4: 15 -> 20 (放宽)
+      rsi_short_threshold: 80     # 🔥 v7.9.4: 85 -> 80 (放宽)
+      expire_minutes: 5        
+      price_abandon_pct: 3.0   
+      rsi_recover_long_abandon: 45  # 🔥 v7.9.4: 40 -> 45 (放宽)
+      rsi_recover_short_abandon: 55 # 🔥 v7.9.4: 60 -> 55 (放宽)
+      price_miss_pct: 2.5
+    
+    normal:
+      expire_minutes: 8        # 🔥 修改: 原4 -> 8 (给更多时间震荡)
+      price_abandon_pct: 2.5   # 🔥 修改: 原1.5 -> 2.5 (防插针)
+      rsi_recover_long_abandon: 45
+      rsi_recover_short_abandon: 55
+      price_miss_pct: 2.0
+    
+    trend_continuation:
+      expire_minutes: 6
+      price_abandon_pct: 2.0
+      price_miss_pct: 3.0
+    
+    trend_anticipation:
+      expire_minutes: 8
+      price_abandon_pct: 2.5
+      price_miss_pct: 3.5
+      allow_deeper_pullback: true
+  
+  dynamic_thresholds:
+    enabled: true
+    atr_period: 14
+    atr_low: 0.015
+    atr_normal: 0.025
+    atr_high: 0.035
+    
+    low_volatility_multiplier: 0.8
+    normal_volatility_multiplier: 1.0
+    high_volatility_multiplier: 1.5
+    extreme_volatility_multiplier: 2.0
+
+# ============ 趋势延续策略 (v7.9已禁用) ============
+trend_continuation:
+  enabled: false  # 🔥 v7.9: 已禁用，特点融入趋势预判
+
+# ============ 🔥🔥🔥 趋势预判策略 (v8.0 - 仅作为分析工具) ============
+# 🔥🔥🔥 v8.0: 禁用独立信号推送，仅供高波动轨道AI审核调用
+trend_anticipation:
+  enabled: false    # 🔥 v8.0: 禁用独立推送
+  analysis_only: true  # 🔥 v8.0: 仅作为分析工具
+  
+  long_conditions:
+    rsi_range: [15, 25]       # 🔥 v7.9.4: [12,20] -> [15,25] 放宽
+    macd_histogram_shrinking: 2
+    price_deceleration: true
+    near_support: true
+  
+  short_conditions:
+    rsi_range: [75, 85]       # 🔥 v7.9.4: [80,88] -> [75,85] 放宽
+    macd_histogram_shrinking: 2
+    price_deceleration: true
+    near_resistance: true
+  
+  # 🔥 v7.9.4：放宽一审条件
+  hard_filter:
+    min_adx: 22               # 🔥 v7.9.4: 28 -> 22 (放宽)
+    min_volume_ratio: 0.8     # 🔥 v7.9.4: 1.0 -> 0.8 (放宽)
+    max_bb_width: 0.030       # 🔥 v7.9.4: 0.022 -> 0.030 (放宽)
+    require_momentum_weakening: true
+    min_orderbook: 0.40       # 🔥 v7.9.4: 0.45 -> 0.40 (放宽)
+  
+  multi_timeframe:
+    enabled: true
+    timeframes: ["1m", "5m", "15m", "1h"]
+    min_confirm_count: 2
+    weights:
+      "1m": 0.15
+      "5m": 0.25
+      "15m": 0.30
+      "1h": 0.30
+  
+  candlestick_patterns:
+    enabled: true
+    patterns_long: ["hammer", "bullish_engulfing", "morning_star", "double_bottom", "falling_wedge"]
+    patterns_short: ["shooting_star", "bearish_engulfing", "evening_star", "double_top", "rising_wedge"]
+    pattern_bonus: 0.08
+  
+  volume_structure:
+    enabled: true
+    declining_volume_on_drop: true
+    volume_spike_on_reversal: true
+    dry_volume_threshold: 0.5
+    spike_threshold: 1.5
+  
+  orderbook_analysis:
+    enabled: true
+    imbalance_threshold: 1.3
+    large_order_threshold: 10000
+  
+  btc_analysis:
+    enabled: true
+    btc_stabilizing_threshold: 0.3    # 🔥 修复：0.3 表示 0.3%（原0.003是错的）
+    btc_reversal_bonus: 0.10
+    require_btc_not_crashing: true
+    btc_crash_threshold: -1.0         # 🔥 新增：-1.0 表示 -1%
+  
+  market_sentiment:
+    enabled: true
+    fear_greed_extreme_low: 20
+    fear_greed_extreme_high: 80
+    extreme_sentiment_bonus: 0.10
+  
+  historical_pattern:
+    enabled: true
+    lookback_days: 30
+    similarity_threshold: 0.7
+    min_samples: 5
+
+# ============ 🔥🔥🔥 信号去重配置 (v7.9.4平衡版) ============
+signal_dedup:
+  enabled: true
+  cooldown_minutes: 30        # 🔥 v7.9.4: 45 -> 30分钟冷却期 (放宽)
+  priority:
+    trend_anticipation: 4
+    reversal: 3
+    trend_explosion: 2
+    trend_continuation: 1
+  replace_rules:
+    allow_opposite_side: true
+    higher_priority_always: true
+    same_priority_score_diff: 0.05  # 🔥 v7.9.4: 0.08 -> 0.05 (放宽)
+    high_winrate_threshold: 0.65
+    winrate_bonus: 0.10
+  
+  scoring:
+    base_score: 0.55
+    min_score_to_emit: 0.75    # 🔥 v7.9.4: 0.80 -> 0.75 (放宽)
+    high_quality_score: 0.85   # 🔥 v7.9.4: 0.88 -> 0.85 (放宽)
+    
+    max_mtf_bonus: 0.15
+    max_pattern_bonus: 0.12
+    max_volume_bonus: 0.10
+    max_support_bonus: 0.15
+    max_orderbook_bonus: 0.08
+    max_btc_bonus: 0.10
+    max_sentiment_bonus: 0.10
+    max_history_bonus: 0.10
+  
+  observation:
+    expire_minutes: 8
+    check_interval_sec: 30
+    price_abandon_pct: 2.5
+    price_miss_pct: 3.5
+  
+  risk:
+    sl_pct: 0.02
+    tp_pct: 0.06
+    use_support_as_sl: true
+    sl_buffer_below_support: 0.005
+
+# ============ 🔥🔥🔥 新增：支撑位/阻力位检测 ============
+support_resistance:
+  enabled: true
+  
+  support_sources:
+    recent_low_24h: true
+    recent_low_7d: true
+    bollinger_lower: true
+    ema_200: true
+    local_lows: true
+    round_numbers: true
+  
+  resistance_sources:
+    recent_high_24h: true
+    recent_high_7d: true
+    bollinger_upper: true
+    ema_200: true
+    local_highs: true
+    round_numbers: true
+  
+  detection:
+    local_pivot_periods: 5
+    round_number_significance: 0.05
+    cluster_threshold: 0.01
+  
+  scoring:
+    distance_very_close: 0.005
+    distance_close: 0.01
+    distance_near: 0.02
+    
+    bonus_very_close: 0.15
+    bonus_close: 0.10
+    bonus_near: 0.05
+    
+    multi_support_bonus: 0.05
+
+# ============ 🔥🔥🔥 信号去重配置 (v7.9精简) ============
+signal_dedup:
+  enabled: true
+  cooldown_minutes: 30  # 30分钟内不重复推同币种
+  
+  priority:
+    trend_anticipation: 2   # 🔥 调整优先级
+    reversal: 2             # 反转和预判同等优先级
+  
+  replace_rules:
+    higher_priority_always: true
+    same_priority_score_diff: 0.05
+    allow_opposite_side: true
+
+# ============ 🔥🔥🔥 新增：AI历史学习配置 ============
+ai_learning:
+  enabled: true
+  
+  inject_history:
+    enabled: true
+    recent_trades_count: 10
+    include_win_loss: true
+    include_reason: true
+    include_market_context: true
+  
+  statistics:
+    enabled: true
+    show_win_rate: true
+    show_avg_profit: true
+    show_best_signal_type: true
+    show_worst_conditions: true
+
+# ============ Claude + DeepSeek 双AI审核 ============
+claude:
+  api_key: "xxxxxxx"
+  model: "claude-sonnet-4-5-20250929"
+  max_tokens: 1500
+  temperature: 0.2
+  timeout: 180
+
+deepseek:
+  enabled: true
+  api_key: "xxxxxxx"
+  model: "deepseek-chat"
+  base_url: "https://api.deepseek.com"
+  timeout: 60
+
+# ============ CoinGecko API 配置 ============
+coingecko:
+  api_key: "xxxxxx"
+  base_url: "https://api.coingecko.com/api/v3"
+  update_interval_minutes: 10
+  cache_ttl_minutes: 10
+  daily_limit: 500
+  alert_threshold: 450
+  timeout_seconds: 15
+  max_retries: 2
+  retry_delay_seconds: 5
+
+# ============ 审核配置 (v7.9.4平衡版) ============
+review:
+  enabled: true
+  hard_rules_filter: true
+  require_data_check: true
+  reversal_only: false
+  min_confidence: 0.88      # 🔥 v7.9.4: 0.93 -> 0.88 (放宽)
+  max_retries: 2
+  
+  hard_rules:
+    min_score: 0.65         # 🔥 v7.9.4: 0.70 -> 0.65 (放宽)
+    min_volume_ratio: 1.5   # 🔥 v7.9.4: 2.0 -> 1.5 (放宽)
+    max_price_change_extreme: 0.50   # 🔥 v7.9.4: 0.45 -> 0.50 (放宽)
+    max_price_change_high: 0.35      # 🔥 v7.9.4: 0.30 -> 0.35 (放宽)
+    price_change_high_min_score: 0.88  # 🔥 v7.9.4: 0.92 -> 0.88 (放宽)
+    price_change_high_min_vol: 2.0     # 🔥 v7.9.4: 2.5 -> 2.0 (放宽)
+    min_adx_with_low_vol: 22           # 🔥 v7.9.4: 25 -> 22 (放宽)
+    bb_squeeze_threshold: 0.01
+    bb_squeeze_vol_min: 1.5
+    adx_trend_end_threshold: 40
+    adx_trend_end_bb: 0.02
+    adx_trend_end_vol: 1.0
+    min_sl_atr_multiplier: 2.0
+    bb_squeeze_sl_atr_multiplier: 2.5
+    low_vol_sl_atr_multiplier: 3.0
+    max_funding_rate: 0.0008
+    min_orderbook_score: 0.42    # 🔥 v7.9.4: 0.48 -> 0.42 (放宽)
+    max_slippage_to_sl_ratio: 0.5
+    low_liquidity_vol_min: 2.0
+
+# ============ FinGPT 情绪分析 ============
+fingpt:
+  enabled: true
+  data_source: "coingecko"
+  
+  sources:
+    fear_greed: true
+    coingecko_market: true
+    coingecko_sentiment: true
+  
+  weights:
+    fear_greed: 0.4
+    coingecko: 0.6
+    
+  thresholds:
+    extreme_positive: 0.5
+    positive: 0.2
+    neutral: 0.0
+    negative: -0.2
+    extreme_negative: -0.5
+  
+  coingecko:
+    market_cap_rank_weight: 0.3
+    price_change_24h_weight: 0.4
+    price_change_7d_weight: 0.3
+    rank_top_10: 10
+    rank_top_30: 30
+    rank_top_50: 50
+    rank_top_100: 9999
+
+# ============ XGBoost 数据收集器 ============
+xgboost:
+  enabled: true
+  db_path: "data/xgboost_training.db"
+  check_interval_minutes: 30
+  fill_check_retries: 3
+  auto_export: true
+  export_path: "data/xgboost_training.csv"
+  export_interval_hours: 24
+  min_samples_for_training: 100
+  positive_negative_ratio: 0.3
+  label_check_hours: 24
+  label_check_interval: "1h"
+  fill_check_minutes: 30
+  fill_tolerance_pct: 0.005
+  
+  features:
+    technical: true
+    fingpt_sentiment: true
+    market_depth: true
+    funding: true
+    oi: true
+
+# ============ 超买超卖策略 ============
+overbought_oversold:
+  enabled: true
+  rsi_period: 14
+  rsi_overbought: 70
+  rsi_oversold: 30
+  rsi_extreme_overbought: 80
+  rsi_extreme_oversold: 20
+  macd_fast: 12
+  macd_slow: 26
+  macd_signal: 9
+  divergence_lookback: 50
+  score_boost_extreme: 0.15
+  score_boost_divergence: 0.12
+  filter_against_trend: true
+
+# ============ OI(期货未平仓量) ============
+oi:
+  enabled: true
+  provider: "binance_futures"
+  interval: "5m"
+  lookback_n: 24
+  poll_min: 10
+  symbol_map:
+    "BTC/USDT:USDT": "BTCUSDT"
+    "ETH/USDT:USDT": "ETHUSDT"
+    "BNB/USDT:USDT": "BNBUSDT"
+    "XRP/USDT:USDT": "XRPUSDT"
+    "SOL/USDT:USDT": "SOLUSDT"
+
+# ============ Funding(资金费率) ============
+funding:
+  enabled: true
+  clip: 0.01
+  symbol_map:
+    "BTC/USDT:USDT": "BTC/USDT:USDT"
+    "ETH/USDT:USDT": "ETH/USDT:USDT"
+    "BNB/USDT:USDT": "BNB/USDT:USDT"
+    "XRP/USDT:USDT": "XRP/USDT:USDT"
+    "SOL/USDT:USDT": "SOL/USDT:USDT"
+
+# ============ 主流币策略 ============
+# 🔥🔥🔥 v8.0: 禁用独立信号推送，只保留高波动轨道
+majors:
+  enabled: false    # 🔥 v8.0: 禁用，只使用高波动轨道
+  symbols: []
+  params:
+    ema_short: 12
+    ema_long: 26
+    atr_period: 14
+  dynamic:
+    enable: true
+    quote: "USDT"
+    top_n_volume: 150
+    max_market_cap_rank: 999
+    refresh_min: 30
+    spot_only: false
+    min_volume_24h_usdt: 2000000
+    coingecko_api_key: ""
+
+# ============ 异常量能策略 ============
+# 🔥🔥🔥 v8.0: 禁用
+anomaly:
+  enabled: false    # 🔥 v8.0: 禁用
+
+# ============ 累积策略 ============
+# 🔥🔥🔥 v8.0: 禁用
+accum:
+  enabled: false    # 🔥 v8.0: 禁用
+
+# ============ 因子权重配置 ============
+weights:
+  trend: 0.34
+  volume: 0.20
+  fingpt_sentiment: 0.1
+  funding: 0.15
+  macro: 0.10
+  orderbook: 0.08
+  oi: 0.03
+
+# ============ 运行时 ============
+runtime:
+  start_notify: true
+  stop_notify: true
+  start_message: "🚀 系统已启动 [v8.0 单轨道版]\n✅ 信号类型: 仅高波动轨道\n✅ 趋势分析: 集成到高波动AI审核\n✅ FDI分形维数 + 聪明钱分析\n🔥 止损2% 止盈5-10%"
+  stop_message: "系统已停止 🛑"
+  llm_debug: false
+  debug_telemetry: false
+
+# ============ 合约交易参数 ============
+futures_trading:
+  enabled: true
+  base_leverage: 15
+  max_leverage: 20
+  max_position_size_pct: 0.015
+  daily_max_trades: 8
+  force_stop_loss: true
+  liquidation_buffer: 0.4
+
+# ============ BTC市场监控 ============
+btc_monitor:
+  enabled: true
+  price_threshold_1h: 0.01
+  price_threshold_4h: 0.015
+  dominance_enabled: true
+  dominance_threshold: 0.5
+  volatility_enabled: true
+  volatility_low: 0.005
+  volatility_high: 0.02
+  volatility_extreme: 0.04
+
+# ============ 智能入场价配置 ============
+smart_entry:
+  enabled: true
+  min_pullback_rate: 0.008
+  max_pullback_rate: 0.06
+  
+  velocity:
+    extreme_threshold: 0.004
+    high_threshold: 0.0015
+  
+  btc_correlation:
+    independent_multiplier: 1.0
+    high_corr_reverse_multiplier: 2.5
+    high_corr_same_multiplier: 1.5
+    medium_corr_multiplier: 1.1
+    crash_multiplier: 3.0
+    moon_multiplier: 3.0
+  
+  signal_type:
+    reversal_multiplier: 1.5
+    trend_multiplier: 0.9
+    independent_multiplier: 0.9
+    overbought_threshold: 70
+    oversold_threshold: 30
+    extreme_multiplier: 1.8
+
+# ============ 信号分类配置 ============
+signal_classification:
+  enabled: true
+  
+  independence:
+    highly_independent: 0.2
+    independent: 0.3
+    weakly_independent: 0.4
+  
+  trend:
+    rsi_neutral_min: 40
+    rsi_neutral_max: 70
+    macd_threshold: 0
+
+# ============ 持仓AI审核配置 ============
+position_review:
+  enabled: true
+  review_interval_sec: 300
+  min_holding_time_min: 10
+  pnl_awkward_min: -0.01
+  pnl_awkward_max: 0.02
+  btc_move_threshold: 0.01
+  volume_spike_threshold: 2.0
+  close_use_tight_sl: true
+  tight_sl_pct: 0.003
+  min_review_interval_sec: 120
+# ============ 🔥🔥🔥 高波动轨道配置 v1.0 ============
+# 轨道2：蓄势预判 + 限价布局 + 全自动交易
+high_volatility_track:
+  enabled: true
+  
+  # ========== 扫描配置 ==========
+  scan:
+    interval_sec: 60           # 扫描间隔：1分钟
+    min_change_24h: 0.08       # 最小24h涨跌幅：8%
+    max_change_24h: 0.40       # 最大24h涨跌幅：40%
+    min_volume_24h: 2000000    # 最小24h成交量：2M USDT
+  
+  # ========== 观察池配置 ==========
+  observation_pool:
+    capacity: 10               # 最大容量：10个币种
+    max_time_min: 30           # 最长观察时间：30分钟
+    readiness_threshold: 60    # 🔥 v7.9.4: 65 -> 60 (放宽)
+  
+  # ========== 限价单配置 ==========
+  limit_order:
+    max_concurrent: 3          # 最多同时挂单：3个
+    valid_sec: 300             # 挂单有效期：5分钟(300秒)
+    max_ai_reviews: 3          # 最多AI重评次数：3次
+  
+  # ========== 止损配置（动态，上限2%）==========
+  stop_loss:
+    atr_lt_3: 0.012            # ATR<3%时，止损1.2%
+    atr_3_5: 0.015             # ATR 3-5%时，止损1.5%
+    atr_5_8: 0.018             # ATR 5-8%时，止损1.8%
+    atr_gt_8: 0.020            # ATR>8%时，止损2.0%
+    max: 0.02                  # 止损上限：2%
+  
+  # ========== 止盈配置 ==========
+  take_profit:
+    min_pct: 0.05              # 最小止盈：5%
+    max_pct: 0.10              # 最大止盈：10%
+    ai_decide: true            # AI决定具体值
+  
+  # ========== 资金配置 ==========
+  capital:
+    track_pct: 0.50            # 🔥 更新: 0.30 -> 0.50 高波动轨道占总资金50%
+    single_pct: 0.35           # 🔥 更新: 0.10 -> 0.35 单笔占轨道资金35% (约5U)
+    high_vol_reduce: 0.5       # 20-40%波动时仓位减半
+  
+  # ========== 持仓配置 ==========
+  position:
+    max_hold_hours: 2          # 最长持仓时间：2小时
+    timeout_close_type: "limit" # 超时平仓方式：限价
+    emergency_close:
+      btc_move_5m_pct: 0.015   # BTC 5分钟波动>1.5%触发
+      consecutive_bad_candles: 5  # 连续5根反向K线触发
+
+# ========== 信号标识说明 ==========
+# 轨道1（常规）信号标识:
+#   📊 [反转] - RSI极值反转信号
+#   📈 [预判] - 趋势预判信号
+# 轨道2（高波动）信号标识:
+#   ⚡ [蓄势] - 高波动蓄势预判信号
